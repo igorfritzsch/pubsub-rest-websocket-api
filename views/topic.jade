@@ -1,0 +1,33 @@
+doctype html
+html
+	head
+		script(type='text/javascript' src="/js/jquery-1.11.1.min.js")
+	body
+		div#msgs(style="height:400; width:400; overflow: scroll;")
+      
+		form#chatForm
+			input#name(type="text")
+			input#msg(type="text")
+			button#sendBtn Send
+			
+		script(type='text/javascript').
+			var socket = new WebSocket('ws://192.168.50.30:8181', 'stompapi');
+			socket.onopen = function() {
+				//socket.send("Message to send");
+				//alert("Message is sent...");
+			};
+			socket.onmessage = function(message) {
+				//alert('New DATA');
+				var data = JSON.parse(message.data);
+				var message = $('<div>' + data.name + ': ' + data.msg + '</div>');
+				$('#msgs').append(message);
+			};
+			$('#sendBtn').on('click', function(e) {
+				alert('sendBtn was pressed.')
+				e.preventDefault();
+				var name = $('#name').val(),
+				msg  = $('#msg').val();
+				socket.send('{"name": "' + name + '", "msg": "' + msg + '"}');
+				$('#msg').val('');
+			});
+			
