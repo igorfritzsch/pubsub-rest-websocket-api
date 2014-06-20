@@ -151,5 +151,5 @@ exports.unsubscribe = function unsubscribe(con){
 	});
 };
 
-//2 minute interval to check for expired subscriptions
+//5 minute interval to check for expired subscriptions
 setInterval(this.unsubscribe, 300000);
