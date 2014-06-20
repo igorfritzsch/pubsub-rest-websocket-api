@@ -7,7 +7,7 @@ var http = require('http'),
 	pubsub = require('./pubsub.js');
 
 exports.index = function(req, res){
-	res.render('index', { title: 'TKN: Publish/Subscribe REST/WebSocket API' });
+	res.render('index', { title: 'Publish & Subscribe REST/WebSocket API' });
 };
 
 exports.topic = function(req, res){
