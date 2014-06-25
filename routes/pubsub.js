@@ -57,7 +57,7 @@ exports.subscribe = function subscribe(dest, con){
 					topic.ws.forEach(function(connection, index, connections){
 						if(connection !== null){
 							topic.time = STS; //Update Timestamp
-							connection.send(message);
+							connection.send(data.body);
 						}
 					});
 				}
@@ -72,10 +72,9 @@ exports.subscribe = function subscribe(dest, con){
 
 exports.publish = function publish(dest, msg){
 	var destination_pattern	= dest.replace(/\//g, '.'),
-		destination			= '/topic/' + destination_pattern,
-		message				= JSON.stringify(msg);
+		destination	= '/topic/' + destination_pattern;
 
-	client.send(destination, {}, message);
+	client.send(destination, {}, msg);
 	return {'type': 'publish', 'response': true};
 };
 
