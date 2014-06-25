@@ -53,7 +53,7 @@ exports.topic_subscribe = function(req, res){
 };
 
 exports.topic_publish = function(req, res){
-	var msg = pubsub.publish(req.params[0], req.body);
+	var msg = pubsub.publish(req.params[0], JSON.stringify(req.body));
 	if (msg.response === false){
 		res.send(405);
 	}
