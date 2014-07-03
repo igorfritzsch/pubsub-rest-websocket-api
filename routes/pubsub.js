@@ -20,9 +20,7 @@ exports.connect = function connect(host, port){
 exports.subscribe = function subscribe(dest, con){
 	var destination_pattern	= dest.replace(/\//g, '.'),
 		destination			= '/topic/' + destination_pattern,
-		subscription_exist	= false,
-		now = new Date(),
-		STS = new Date(now.getTime() + (24 * 60 * 60 * 1000));
+		subscription_exist	= false;
 	
 	con = typeof con !== 'undefined' ? con : null;
 	
@@ -30,7 +28,7 @@ exports.subscribe = function subscribe(dest, con){
 	storage.forEach(function(topic, index, topics){
 		if(destination_pattern === topic.name){
 			subscription_exist = true;
-			topic.time = STS; //Update Timestamp
+			topic.time = Date.now() + (24 * 60 * 60 * 1000); //Update Timestamp
 			if(con !== null){
 				topic.ws.push(con);
 			}
@@ -56,13 +54,15 @@ exports.subscribe = function subscribe(dest, con){
 					
 					topic.ws.forEach(function(connection, index, connections){
 						if(connection !== null){
-							topic.time = STS; //Update Timestamp
+							topic.time = Date.now() + (24 * 60 * 60 * 1000); //Update Timestamp
 							connection.send(data.body);
 						}
 					});
 				}
 			});
 		}, { persistent: false });
+		
+		var STS = Date.now() + (24 * 60 * 60 * 1000);
 		
 		storage.push({'name': destination_pattern, 'data': null, 'sid': SID, 'time': STS, 'ws': [ con ]});
 	}
@@ -106,15 +106,13 @@ exports.getTopic = function getTopic(dest){
 exports.getTopicMessage = function getTopicMessage(dest){
 	var destination_pattern	= dest.replace(/\//g, '.'),
 		subscription_exist	= false,
-		message,
-		now = new Date(),
-		STS = new Date(now.getTime() + (24 * 60 * 60 * 1000));
+		message;
 	
 	
 	storage.forEach(function(topic, index, topics){
 		if(destination_pattern === topic.name){
 			subscription_exist = true;
-			topic.time = STS;
+			topic.time = Date.now() + (24 * 60 * 60 * 1000);
 			message = topic.data;
 			return;
 		}
@@ -129,12 +127,11 @@ exports.getTopicMessage = function getTopicMessage(dest){
 };
 
 exports.unsubscribe = function unsubscribe(con){
-	var now = new Date();
 	
 	con = typeof con !== 'undefined' ? con : null;
 
 	storage.forEach(function(topic, index, topics){
-		if(now >= topic.time){
+		if(Date.now() >= topic.time){
 			
 			topic.sid.unsubscribe();
 			storage.splice(index, 1);
