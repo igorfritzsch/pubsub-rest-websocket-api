@@ -81,15 +81,13 @@ exports.publish = function publish(dest, msg){
 exports.getTopic = function getTopic(dest){
 	var destination_pattern	= dest.replace(/\//g, '.'),
 		subscription_exist	= false,
-		subscription,
-		now = new Date(),
-		STS = new Date(now.getTime() + (24 * 60 * 60 * 1000));
+		subscription;
 	
 	
 	storage.forEach(function(topic, index, topics){
 		if(destination_pattern === topic.name){
 			subscription_exist = true;
-			topic.time = STS;
+			topic.time = Date.now() + (24 * 60 * 60 * 1000);
 			subscription = topic.name;
 			return;
 		}
