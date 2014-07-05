@@ -67,7 +67,7 @@ exports.subscribe = function subscribe(dest, con){
 		storage.push({'name': destination_pattern, 'data': null, 'sid': SID, 'time': STS, 'ws': [ con ]});
 	}
 	
-	return {'type': 'subscribe', 'response': true};
+	return {'topic': destination_pattern, 'type': 'subscribe', 'response': true};
 };
 
 exports.publish = function publish(dest, msg){
@@ -75,29 +75,27 @@ exports.publish = function publish(dest, msg){
 		destination	= '/topic/' + destination_pattern;
 
 	client.send(destination, {}, msg);
-	return {'type': 'publish', 'response': true};
+	return {'topic': destination_pattern, 'type': 'publish', 'response': true};
 };
 
 exports.getTopic = function getTopic(dest){
 	var destination_pattern	= dest.replace(/\//g, '.'),
-		subscription_exist	= false,
-		subscription;
+		subscription_exist	= false;
 	
 	
 	storage.forEach(function(topic, index, topics){
 		if(destination_pattern === topic.name){
 			subscription_exist = true;
 			topic.time = Date.now() + (24 * 60 * 60 * 1000);
-			subscription = topic.name;
 			return;
 		}
 	});
 	
 	if(subscription_exist === false){
-		return {'type': 'get', 'response': false};
+		return {'topic': destination_pattern, 'type': 'get', 'response': false};
 	}
 	else{
-		return {'type': 'get', 'response': true, 'subscribtion': subscription};
+		return {'topic': destination_pattern, 'type': 'get', 'response': true, 'subscribtion': subscription};
 	}
 };
 
@@ -117,10 +115,10 @@ exports.getTopicMessage = function getTopicMessage(dest){
 	});
 	
 	if(subscription_exist === false){
-		return {'type': 'get', 'response': false};
+		return {'topic': destination_pattern, 'type': 'get', 'response': false};
 	}
 	else{
-		return {'type': 'get', 'response': true, 'message': message};
+		return {'topic': destination_pattern, 'type': 'get', 'response': true, 'message': message};
 	}
 };
 
