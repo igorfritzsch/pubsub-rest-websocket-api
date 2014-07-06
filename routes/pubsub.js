@@ -95,7 +95,7 @@ exports.getTopic = function getTopic(dest){
 		return {'topic': destination_pattern, 'type': 'get', 'response': false};
 	}
 	else{
-		return {'topic': destination_pattern, 'type': 'get', 'response': true, 'subscribtion': subscription};
+		return {'topic': destination_pattern, 'type': 'get', 'response': true};
 	}
 };
 
