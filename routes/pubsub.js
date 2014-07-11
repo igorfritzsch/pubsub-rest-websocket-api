@@ -2,7 +2,8 @@ var http = require('http')
   ,	stomp = require('stompjs');
 
 var client,
-	storage = [];
+	storage = [],
+    delsubtime = 86400000; //(24 * 60 * 60 * 1000) := 24 Stunden
 
 var on_connect	= function() {
 	console.log('STOMP socket connection established.');
@@ -28,7 +29,7 @@ exports.subscribe = function subscribe(dest, con){
 	storage.forEach(function(topic, index, topics){
 		if(destination_pattern === topic.name){
 			subscription_exist = true;
-			topic.time = Date.now() + (24 * 60 * 60 * 1000); //Update Timestamp
+			topic.time = Date.now() + delsubtime; //Update Timestamp
 			if(con !== null){
 				topic.ws.push(con);
 			}
@@ -54,7 +55,7 @@ exports.subscribe = function subscribe(dest, con){
 					
 					topic.ws.forEach(function(connection, index, connections){
 						if(connection !== null){
-							topic.time = Date.now() + (24 * 60 * 60 * 1000); //Update Timestamp
+							topic.time = Date.now() + delsubtime; //Update Timestamp
 							connection.send(data.body);
 						}
 					});
@@ -62,7 +63,7 @@ exports.subscribe = function subscribe(dest, con){
 			});
 		}, { persistent: false });
 		
-		var STS = Date.now() + (24 * 60 * 60 * 1000);
+		var STS = Date.now() + delsubtime;
 		
 		storage.push({'name': destination_pattern, 'data': null, 'sid': SID, 'time': STS, 'ws': [ con ]});
 	}
@@ -86,7 +87,7 @@ exports.getTopic = function getTopic(dest){
 	storage.forEach(function(topic, index, topics){
 		if(destination_pattern === topic.name){
 			subscription_exist = true;
-			topic.time = Date.now() + (24 * 60 * 60 * 1000);
+			topic.time = Date.now() + delsubtime;
 			return;
 		}
 	});
@@ -108,7 +109,7 @@ exports.getTopicMessage = function getTopicMessage(dest){
 	storage.forEach(function(topic, index, topics){
 		if(destination_pattern === topic.name){
 			subscription_exist = true;
-			topic.time = Date.now() + (24 * 60 * 60 * 1000);
+			topic.time = Date.now() + delsubtime;
 			message = topic.data;
 			return;
 		}

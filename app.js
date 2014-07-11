@@ -5,34 +5,22 @@
 
 var express = require('express')
   , routes = require('./routes')
+  , pubsub = require('./routes/pubsub.js')
   , wssrv = require('websocket').server
-  , http = require('http')
-  , net = require('net')
-  , path = require('path')
-  , pubsub = require('./routes/pubsub.js');
+  , http = require('http');
 
 var app = express();
 
-// all environments
-app.set('port', process.env.PORT || 3000);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
-app.use(express.favicon());
-app.use(express.logger('dev'));
-app.use(express.bodyParser());
-app.use(express.methodOverride());
-app.use(app.router);
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('js', express.static(__dirname + '/public/js'));
 
-// development only
-if ('development' == app.get('env')) {
-  app.use(express.errorHandler());
-}
+app.use(express.bodyParser());
+app.use(express.favicon());
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', routes.index);
 app.get('/topics', routes.topic); //List all topics ONLY RabbitMQ
-
 app.post(/^\/topics\/([A-Za-z0-9\-\_\%\/]*[A-Za-z0-9\-\_])$/, routes.topic_subscribe);
 app.put(/^\/topics\/([A-Za-z0-9\-\_\%\/]*[A-Za-z0-9\-\_])\/data$/, routes.topic_publish);
 app.get(/^\/topics\/([A-Za-z0-9\-\_\%\/]*[A-Za-z0-9\-\_])\/data$/, routes.topic_message_get);
