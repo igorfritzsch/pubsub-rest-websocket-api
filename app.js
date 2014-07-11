@@ -17,7 +17,7 @@ app.set('view engine', 'jade');
 app.use(express.bodyParser());
 app.use(express.favicon());
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use('/style', express.static(__dirname + '/public/style'));
 
 app.get('/', routes.index);
 app.get('/topics', routes.topic); //List all topics ONLY RabbitMQ
