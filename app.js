@@ -4,10 +4,9 @@
  */
 
 var express = require('express')
-  , routes = require('./routes')
-  , pubsub = require('./routes/pubsub.js')
-  , wssrv = require('websocket').server
-  , http = require('http');
+  , pubsub = require('./lib/pubsub.js')
+  , rest = require('./lib/rest.js')
+  , ws = require('./lib/ws.js');
 
 var app = express();
 
@@ -19,68 +18,18 @@ app.use(express.favicon());
 
 app.use('/style', express.static(__dirname + '/public/style'));
 
-app.get('/', routes.index);
-app.get('/topics', routes.topic); //List all topics ONLY RabbitMQ
-app.post(/^\/topics\/([A-Za-z0-9\-\_\%\/]*[A-Za-z0-9\-\_])$/, routes.topic_subscribe);
-app.put(/^\/topics\/([A-Za-z0-9\-\_\%\/]*[A-Za-z0-9\-\_])\/data$/, routes.topic_publish);
-app.get(/^\/topics\/([A-Za-z0-9\-\_\%\/]*[A-Za-z0-9\-\_])\/data$/, routes.topic_message_get);
-app.get(/^\/topics\/([A-Za-z0-9\-\_\%\/]*[A-Za-z0-9\-\_])$/, routes.topic_get);
-
-//HTTP-Server
-app.listen(3000);
-var server = http.createServer();
-server.listen(8181);
+app.get('/', rest.index);
+app.get('/topics', rest.topic); //List all topics ONLY RabbitMQ
+app.post(/^\/topics\/([A-Za-z0-9\-\_\%\/]*[A-Za-z0-9\-\_])$/, rest.topic_subscribe);
+app.put(/^\/topics\/([A-Za-z0-9\-\_\%\/]*[A-Za-z0-9\-\_])\/data$/, rest.topic_publish);
+app.get(/^\/topics\/([A-Za-z0-9\-\_\%\/]*[A-Za-z0-9\-\_])\/data$/, rest.topic_message_get);
+app.get(/^\/topics\/([A-Za-z0-9\-\_\%\/]*[A-Za-z0-9\-\_])$/, rest.topic_get);
 
 //Connect to Broker
 pubsub.connect('localhost', 61613);
 
-//WebSocket Server
-var wss = new wssrv({
-	httpServer: server,
-	autoAcceptConnections: false
-});
+//Start REST interface
+app.listen(3000);
 
-wss.on('request', function(request) {
-	var connection = request.accept(null, request.origin);
-	
-	connection.on('message', function(message){
-		try {
-			var req;
-			
-			if(message.type === 'utf8') {
-				req = JSON.parse(message.utf8Data);
-			}
-			else {
-				req = message;
-			}
-
-			var destination = req.destination.match(/^\/topics\/([A-Za-z0-9\-\_\#\/]*[A-Za-z0-9\-\_\#])$/);
-				
-			if(destination !== null){
-				var msg;
-				switch(req.type){
-				case 'subscribe':
-					msg = pubsub.subscribe(destination[1], connection);
-					connection.send(JSON.stringify(msg));
-					break;
-				case 'publish':
-					msg = pubsub.publish(destination[1], req.message);
-					connection.send(JSON.stringify(msg));
-					break;
-				default:
-					connection.send(JSON.stringify({'type': req.type, 'response': false}));
-				}
-			}
-			else {
-				connection.send(JSON.stringify({"return": "Invalid destination."}));
-			}
-		}
-		catch (e){
-			connection.send(JSON.stringify({"return": "Invalid data."}));
-		}
-	});
-	connection.on('close', function(reasonCode, description) {
-		pubsub.unsubscribe(connection);
-        console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
-    });
-});
+//Start WebSocket interface
+ws.listen(8181);

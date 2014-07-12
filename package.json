@@ -1,6 +1,6 @@
 {
-  "name": "dvbinfo",
-  "version": "0.0.1",
+  "name": "pubsub-rest-websocket-api",
+  "version": "0.0.9",
   "private": true,
   "scripts": {
     "start": "node app.js"
